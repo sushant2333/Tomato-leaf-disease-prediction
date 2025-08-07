@@ -28,8 +28,8 @@ A beautiful, AI-powered web application for detecting and diagnosing tomato plan
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/tomato-disease-prediction.git
-   cd tomato-disease-prediction
+   git clone https://github.com/sushant2333/Tomato-leaf-disease-prediction.git
+   cd Tomato-leaf-disease-prediction
    ```
 
 2. **Create virtual environment**
@@ -51,8 +51,17 @@ A beautiful, AI-powered web application for detecting and diagnosing tomato plan
    pip install -r web_requirements.txt
    ```
 
-5. **Download the model**
-   - Download the trained model file `best_tomato_model.h5`
+5. **Download the trained model**
+   
+   **Option 1: Download from GitHub Releases (Recommended)**
+   ```bash
+   # Download the model file
+   curl -L -o best_tomato_model.h5 "https://github.com/sushant2333/Tomato-leaf-disease-prediction/releases/download/v1.0.0/best_tomato_model.h5"
+   ```
+   
+   **Option 2: Manual Download**
+   - Go to [Releases](https://github.com/sushant2333/Tomato-leaf-disease-prediction/releases)
+   - Download `best_tomato_model.h5` from the latest release
    - Place it in the root directory of the project
 
 6. **Run the application**
@@ -70,6 +79,7 @@ A beautiful, AI-powered web application for detecting and diagnosing tomato plan
 tomato-disease-prediction/
 ├── app.py                      # Flask backend application
 ├── run_web_app.py             # Application launcher
+├── best_tomato_model.h5       # Trained model (download separately)
 ├── templates/
 │   └── web_app.html          # Main web interface
 ├── static/
@@ -206,7 +216,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 If you encounter any issues or have questions:
 
-1. Check the [Issues](https://github.com/yourusername/tomato-disease-prediction/issues) page
+1. Check the [Issues](https://github.com/sushant2333/Tomato-leaf-disease-prediction/issues) page
 2. Create a new issue with detailed information
 3. Contact the maintainers
 
