@@ -1,4 +1,4 @@
-# 🍅 Tomato Disease Prediction Web App
+# 🍅 Tomato Disease Prediction
 
 A beautiful, AI-powered web application for detecting and diagnosing tomato plant diseases using deep learning. Built with Flask, TensorFlow, and modern web technologies.
 
@@ -28,7 +28,7 @@ A beautiful, AI-powered web application for detecting and diagnosing tomato plan
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/tomato-disease-prediction.git
+   git clone https://github.com/sushant2333/tomato-disease-prediction.git
    cd tomato-disease-prediction
    ```
 
