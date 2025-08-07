@@ -91,6 +91,32 @@ tomato-disease-prediction/
 ├── .gitignore                # Git ignore rules
 └── README.md                 # This file
 ```
+---
+## 📸 Screenshots Of Project
+
+<table>
+  <tr>
+    <td><img src="assets/Screenshot 2025-08-07 152023.png" width="300"/></td>
+    <td><img src="assets/Screenshot 2025-08-07 152045.png" width="300"/></td>
+  </tr>
+ <tr>
+    <td><img src="assets/Screenshot 2025-08-07 152059.png" width="300"/></td>
+    <td><img src="assets/Screenshot 2025-08-07 152120.png" width="300"/></td>
+  </tr>
+ <tr>
+    <td><img src="assets/Screenshot 2025-08-07 152224.png" width="300"/></td>
+    <td><img src="assets/Screenshot 2025-08-07 152252.png" width="300"/></td>
+  </tr>
+   <tr>
+    <td><img src="assets/Screenshot 2025-08-07 152302.png" width="300"/></td>
+    <td><img src="assets/Screenshot 2025-08-07 152321.png" width="300"/></td>
+  </tr>
+   <tr>
+    <td><img src="assets/Screenshot 2025-08-07 152507.png" width="300"/></td>
+    <td><img src="assets/Screenshot 2025-08-07 152606.png" width="300"/></td>
+  </tr>
+</table>
+
 
 ## 🎯 How to Use
 
