@@ -84,6 +84,8 @@ tomato-disease-prediction/
 │   └── web_app.html          # Main web interface
 ├── static/
 │   └── images/               # Sample disease images
+├── assets/                   # 🆕 Empty folder for future use
+│   └── .gitkeep             # Ensures folder is tracked by Git
 ├── web_requirements.txt       # Python dependencies
 ├── WEB_APP_README.md         # Detailed documentation
 ├── .gitignore                # Git ignore rules
