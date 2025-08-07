@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍅 Tomato Disease Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Neon glow effects */
+        .neon-glow {
+            text-shadow: 0 0 10px #00d4aa, 0 0 20px #00d4aa, 0 0 30px #00d4aa;
+        }
+
+        .neon-border {
+            border: 2px solid #00d4aa;
+            box-shadow: 0 0 10px #00d4aa, inset 0 0 10px rgba(0, 212, 170, 0.1);
+        }
+
+        .neon-bg {
+            background: linear-gradient(135deg, rgba(0, 212, 170, 0.1) 0%, rgba(26, 26, 46, 0.9) 100%);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 2rem 0;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+            border-bottom: 2px solid #00d4aa;
+            box-shadow: 0 0 20px rgba(0, 212, 170, 0.3);
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #4a9eff;
+            margin-bottom: 1rem;
+            text-shadow: none;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #64ffda;
+            opacity: 0.9;
+        }
+
+        /* Navigation */
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            padding: 1rem 0;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+            color: #1a1a2e;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 170, 0.4);
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #64ffda 0%, #00d4aa 100%);
+            box-shadow: 0 0 15px rgba(100, 255, 218, 0.5);
+        }
+
+        /* Main content */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Prediction Section */
+        .prediction-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .upload-area {
+            background: linear-gradient(135deg, rgba(45, 55, 72, 0.8) 0%, rgba(74, 85, 104, 0.8) 100%);
+            border: 2px solid #00d4aa;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 212, 170, 0.2);
+        }
+
+        .upload-area h3 {
+            color: #00d4aa;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px rgba(0, 212, 170, 0.5);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+            color: #1a1a2e;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 1rem 0;
+            box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3);
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 170, 0.4);
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            margin: 1rem 0;
+            border: 2px solid #00d4aa;
+            box-shadow: 0 0 15px rgba(0, 212, 170, 0.3);
+        }
+
+        /* Results Area */
+        .results-area {
+            background: linear-gradient(135deg, rgba(45, 55, 72, 0.8) 0%, rgba(74, 85, 104, 0.8) 100%);
+            border: 2px solid #64ffda;
+            border-radius: 15px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(100, 255, 218, 0.2);
+        }
+
+        .results-area h3 {
+            color: #64ffda;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px rgba(100, 255, 218, 0.5);
+        }
+
+        .prediction-result {
+            background: linear-gradient(135deg, rgba(0, 212, 170, 0.1) 0%, rgba(26, 26, 46, 0.9) 100%);
+            border: 2px solid #00d4aa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e53e3e 0%, #ed8936 50%, #38a169 100%);
+            transition: width 0.5s ease;
+        }
+
+        /* Disease Info Section */
+        .diseases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .disease-card {
+            background: linear-gradient(135deg, rgba(45, 55, 72, 0.8) 0%, rgba(74, 85, 104, 0.8) 100%);
+            border: 2px solid #64ffda;
+            border-radius: 15px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(100, 255, 218, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .disease-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(100, 255, 218, 0.3);
+        }
+
+        .disease-card h3 {
+            color: #64ffda;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px rgba(100, 255, 218, 0.5);
+        }
+
+        .disease-card p {
+            color: #e2e8f0;
+            margin: 0.8rem 0;
+            line-height: 1.6;
+        }
+
+        .disease-card strong {
+            color: #00d4aa;
+            font-weight: bold;
+        }
+
+        .disease-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin: 1rem 0;
+            border: 2px solid #64ffda;
+            box-shadow: 0 4px 15px rgba(100, 255, 218, 0.2);
+        }
+
+        .severity-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .severity-critical {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
+        }
+
+        .severity-high {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(237, 137, 54, 0.3);
+        }
+
+        .severity-medium {
+            background: linear-gradient(135deg, #ecc94b 0%, #d69e2e 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(236, 201, 75, 0.3);
+        }
+
+        .severity-none {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(56, 161, 105, 0.3);
+        }
+
+        /* Loading animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 212, 170, 0.3);
+            border-top: 4px solid #00d4aa;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .prediction-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .diseases-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #2d3748;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #00d4aa;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00b894;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>🍅 Tomato Disease Predictor</h1>
+        <p>Advanced AI-powered disease detection with comprehensive treatment information</p>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav">
+        <button class="nav-btn active" onclick="showSection('prediction')">🔍 Prediction</button>
+        <button class="nav-btn" onclick="showSection('diseases')">📚 Disease Guide</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Prediction Section -->
+        <div id="prediction" class="section active">
+            <div class="prediction-container">
+                <div class="upload-area">
+                    <h3>📤 Upload Image</h3>
+                    <p>Upload a clear image of a tomato leaf for disease analysis</p>
+                    <input type="file" id="imageInput" class="file-input" accept="image/*">
+                    <button class="upload-btn" onclick="document.getElementById('imageInput').click()">
+                        Choose Image
+                    </button>
+                    <div id="imagePreview"></div>
+                    <button class="upload-btn" id="predictBtn" onclick="predictDisease()" style="display: none;">
+                        🔍 Analyze Image
+                    </button>
+                </div>
+
+                <div class="results-area">
+                    <h3>📊 Analysis Results</h3>
+                    <div id="loading" class="loading">
+                        <div class="spinner"></div>
+                        <p>Analyzing image...</p>
+                    </div>
+                    <div id="results"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diseases Information Section -->
+        <div id="diseases" class="section">
+            <h2 style="text-align: center; color: #64ffda; margin-bottom: 2rem; font-size: 2.5rem;">
+                📚 Complete Disease Guide
+            </h2>
+            <div class="diseases-grid" id="diseasesGrid">
+                <!-- Disease cards will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Disease information data
+        const diseasesData = {
+            'Bacterial_spot': {
+                name: 'Bacterial Spot',
+                description: 'A serious bacterial disease that affects tomato plants, causing dark spots on leaves, stems, and fruits.',
+                cause: 'Caused by Xanthomonas spp. bacteria, particularly Xanthomonas vesicatoria. Spread through contaminated seeds, plant debris, and water splash.',
+                symptoms: 'Small, dark, water-soaked lesions on leaves that become brown with yellow halos. Lesions may coalesce and cause defoliation. Similar spots appear on stems and fruits.',
+                treatment: 'Remove and destroy infected plants. Use copper-based bactericides. Practice crop rotation. Use disease-free seeds. Maintain proper spacing for air circulation.',
+                prevention: 'Use resistant varieties. Avoid overhead irrigation. Sanitize tools between plants. Remove plant debris after harvest.',
+                severity: 'High',
+                color: '#e53e3e',
+                image: '/static/images/bacterial_spot_sample.jpg'
+            },
+            'Early_blight': {
+                name: 'Early Blight',
+                description: 'A common fungal disease that causes characteristic target-like lesions on tomato leaves.',
+                cause: 'Caused by Alternaria solani fungus. Favored by warm, humid conditions and stressed plants.',
+                symptoms: 'Dark brown spots with concentric rings (target-like appearance) on lower leaves first. Lesions may have yellow halos. Severe infection causes defoliation.',
+                treatment: 'Remove infected leaves. Apply fungicides containing chlorothalonil or mancozeb. Improve air circulation. Mulch to prevent soil splash.',
+                prevention: 'Use resistant varieties. Space plants properly. Avoid overhead irrigation. Remove lower leaves as plant grows.',
+                severity: 'Medium',
+                color: '#ed8936',
+                image: '/static/images/early_blight_sample.jpg'
+            },
+            'Late_blight': {
+                name: 'Late Blight',
+                description: 'A devastating fungal disease that can rapidly destroy entire tomato crops.',
+                cause: 'Caused by Phytophthora infestans. Thrives in cool, wet conditions. Spreads rapidly through wind and water.',
+                symptoms: 'Large, irregular brown lesions on leaves with white mold on undersides. Lesions may appear water-soaked. Rapid defoliation and fruit rot.',
+                treatment: 'Immediate removal of infected plants. Apply fungicides containing copper or chlorothalonil. Improve drainage and air circulation.',
+                prevention: 'Use resistant varieties. Avoid overhead irrigation. Space plants widely. Monitor weather conditions. Apply preventive fungicides.',
+                severity: 'Critical',
+                color: '#8b5cf6',
+                image: '/static/images/late_blight_sample.jpg'
+            },
+            'Leaf_Mold': {
+                name: 'Leaf Mold',
+                description: 'A fungal disease that primarily affects greenhouse-grown tomatoes but can occur outdoors.',
+                cause: 'Caused by Passalora fulva (formerly Cladosporium fulvum). Favored by high humidity and poor air circulation.',
+                symptoms: 'Yellow spots on upper leaf surface with olive-green to grayish-brown mold on lower surface. Lesions may coalesce and cause defoliation.',
+                treatment: 'Improve air circulation and reduce humidity. Apply fungicides containing chlorothalonil or copper. Remove infected leaves.',
+                prevention: 'Use resistant varieties. Maintain proper spacing. Ventilate greenhouses. Avoid overhead irrigation.',
+                severity: 'Medium',
+                color: '#10b981',
+                image: '/static/images/leaf_mold_sample.jpg'
+            },
+            'Septoria_leaf_spot': {
+                name: 'Septoria Leaf Spot',
+                description: 'A fungal disease that causes small, circular spots on tomato leaves.',
+                cause: 'Caused by Septoria lycopersici. Spreads through water splash and contaminated tools.',
+                symptoms: 'Small, circular spots with gray centers and dark borders. Spots may have black dots (fungal spores) in centers. Severe infection causes defoliation.',
+                treatment: 'Remove infected leaves. Apply fungicides containing chlorothalonil or mancozeb. Improve air circulation.',
+                prevention: 'Use disease-free seeds. Space plants properly. Avoid overhead irrigation. Remove plant debris.',
+                severity: 'Medium',
+                color: '#f59e0b',
+                image: '/static/images/septoria_leaf_spot_sample.jpg'
+            },
+            'Spider_mites Two-spotted_spider_mite': {
+                name: 'Spider Mites',
+                description: 'Tiny arachnids that feed on plant sap, causing stippling and webbing on leaves.',
+                cause: 'Two-spotted spider mites (Tetranychus urticae). Thrive in hot, dry conditions. Spread through wind and contaminated plants.',
+                symptoms: 'Fine stippling (tiny white dots) on leaves. Fine webbing on leaf undersides. Leaves may turn yellow and drop. Severe infestation causes defoliation.',
+                treatment: 'Apply miticides or insecticidal soaps. Use predatory mites. Increase humidity. Remove heavily infested leaves.',
+                prevention: 'Monitor plants regularly. Maintain adequate humidity. Avoid over-fertilization. Use reflective mulches.',
+                severity: 'Medium',
+                color: '#dc2626',
+                image: '/static/images/spider_mites_two-spotted_spider_mite_sample.jpg'
+            },
+            'Target_Spot': {
+                name: 'Target Spot',
+                description: 'A fungal disease that causes target-like lesions on leaves and fruits.',
+                cause: 'Caused by Corynespora cassiicola. Spreads through water splash and contaminated tools.',
+                symptoms: 'Target-like lesions with concentric rings on leaves. Lesions may have yellow halos. Similar spots on stems and fruits.',
+                treatment: 'Remove infected leaves. Apply fungicides containing chlorothalonil or mancozeb. Improve air circulation.',
+                prevention: 'Use resistant varieties. Space plants properly. Avoid overhead irrigation. Remove plant debris.',
+                severity: 'Medium',
+                color: '#7c2d12',
+                image: '/static/images/target_spot_sample.jpg'
+            },
+            'Tomato_Yellow_Leaf_Curl_Virus': {
+                name: 'Yellow Leaf Curl Virus',
+                description: 'A viral disease transmitted by whiteflies that causes severe stunting and leaf curling.',
+                cause: 'Transmitted by whiteflies (Bemisia tabaci). Virus can persist in weeds and other host plants.',
+                symptoms: 'Yellow, upward-curled leaves. Stunted growth. Reduced fruit production. Plants may appear bushy due to shortened internodes.',
+                treatment: 'Remove infected plants immediately. Control whiteflies with insecticides or biological controls. No cure for infected plants.',
+                prevention: 'Use resistant varieties. Control whiteflies. Remove weeds and alternative hosts. Use reflective mulches.',
+                severity: 'High',
+                color: '#fbbf24',
+                image: '/static/images/tomato_yellow_leaf_curl_virus_sample.jpg'
+            },
+            'Tomato_mosaic_virus': {
+                name: 'Mosaic Virus',
+                description: 'A viral disease that causes mottled, distorted leaves and reduced fruit quality.',
+                cause: 'Transmitted by contact, contaminated tools, and some insects. Can persist in plant debris and seeds.',
+                symptoms: 'Mottled, distorted leaves with light and dark green areas. Stunted growth. Reduced fruit production and quality.',
+                treatment: 'Remove infected plants. Disinfect tools between plants. No cure for infected plants.',
+                prevention: 'Use disease-free seeds. Disinfect tools. Control insects. Remove plant debris. Avoid handling plants when wet.',
+                severity: 'High',
+                color: '#ea580c',
+                image: '/static/images/tomato_mosaic_virus_sample.jpg'
+            },
+            'powdery_mildew': {
+                name: 'Powdery Mildew',
+                description: 'A fungal disease that creates white powdery patches on leaves and stems.',
+                cause: 'Caused by Oidium lycopersicum. Favored by high humidity and moderate temperatures.',
+                symptoms: 'White to grayish powdery patches on leaves, stems, and sometimes fruits. Leaves may become distorted and drop.',
+                treatment: 'Apply fungicides containing sulfur or potassium bicarbonate. Improve air circulation. Remove infected leaves.',
+                prevention: 'Use resistant varieties. Maintain proper spacing. Avoid overhead irrigation. Monitor humidity levels.',
+                severity: 'Medium',
+                color: '#6b7280',
+                image: '/static/images/powdery_mildew_sample.jpg'
+            },
+            'healthy': {
+                name: 'Healthy Plant',
+                description: 'A healthy tomato plant with no signs of disease or pest infestation.',
+                cause: 'No disease present. Plant is growing under optimal conditions.',
+                symptoms: 'Green, healthy leaves with normal appearance. Good growth and development. No spots, lesions, or discoloration.',
+                treatment: 'Continue regular care and monitoring. Maintain optimal growing conditions.',
+                prevention: 'Practice good cultural practices. Monitor plants regularly. Use disease-resistant varieties.',
+                severity: 'None',
+                color: '#059669',
+                image: '/static/images/healthy_sample.jpg'
+            }
+        };
+
+        // Navigation function
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        // File upload handling
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('imagePreview');
+                    preview.innerHTML = `
+                        <img src="${e.target.result}" class="preview-image" alt="Preview">
+                    `;
+                    document.getElementById('predictBtn').style.display = 'inline-block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Prediction function (real API call)
+        async function predictDisease() {
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const imageInput = document.getElementById('imageInput');
+            
+            if (!imageInput.files[0]) {
+                alert('Please select an image first.');
+                return;
+            }
+            
+            loading.style.display = 'block';
+            results.innerHTML = '';
+            
+            try {
+                // Get the image file
+                const file = imageInput.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = async function(e) {
+                    const imageData = e.target.result;
+                    
+                    // Send to Flask backend
+                    const response = await fetch('/predict', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            image: imageData
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    loading.style.display = 'none';
+                    
+                    if (data.success) {
+                        const prediction = data.prediction;
+                        const severityClass = `severity-${prediction.severity.toLowerCase()}`;
+                        
+                        results.innerHTML = `
+                            <div class="prediction-result">
+                                <h4 style="color: #00d4aa; font-size: 1.5rem; margin-bottom: 1rem;">
+                                    🎯 Prediction Result
+                                </h4>
+                                <p><strong>Disease:</strong> ${prediction.name}</p>
+                                <p><strong>Confidence:</strong> ${(prediction.confidence * 100).toFixed(1)}%</p>
+                                <div class="confidence-bar">
+                                    <div class="confidence-fill" style="width: ${prediction.confidence * 100}%"></div>
+                                </div>
+                                <div class="${severityClass}">Severity: ${prediction.severity}</div>
+                            </div>
+                            
+                            <div style="margin-top: 2rem;">
+                                <h4 style="color: #64ffda; margin-bottom: 1rem;">ℹ️ About ${prediction.name}</h4>
+                                <p><strong>Description:</strong> ${prediction.description}</p>
+                                <p><strong>Cause:</strong> ${prediction.cause}</p>
+                                <p><strong>Symptoms:</strong> ${prediction.symptoms}</p>
+                                <p><strong>Treatment:</strong> ${prediction.treatment}</p>
+                                <p><strong>Prevention:</strong> ${prediction.prevention}</p>
+                            </div>
+                            
+                            <div style="margin-top: 2rem;">
+                                <h4 style="color: #64ffda; margin-bottom: 1rem;">📊 All Predictions</h4>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                    ${Object.entries(data.all_predictions)
+                                        .sort(([,a], [,b]) => b - a)
+                                        .map(([disease, confidence]) => {
+                                            const diseaseInfo = diseasesData[disease] || { name: disease };
+                                            return `
+                                                <div style="background: rgba(0, 212, 170, 0.1); border: 1px solid #00d4aa; border-radius: 8px; padding: 1rem; text-align: center;">
+                                                    <div style="font-weight: bold; color: #00d4aa;">${diseaseInfo.name}</div>
+                                                    <div style="color: #64ffda;">${(confidence * 100).toFixed(1)}%</div>
+                                                </div>
+                                            `;
+                                        }).join('')}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        results.innerHTML = `
+                            <div style="background: rgba(229, 62, 62, 0.2); border: 1px solid #e53e3e; border-radius: 10px; padding: 1rem; color: #e53e3e;">
+                                ❌ ${data.error}
+                            </div>
+                        `;
+                    }
+                };
+                
+                reader.readAsDataURL(file);
+                
+            } catch (error) {
+                loading.style.display = 'none';
+                results.innerHTML = `
+                    <div style="background: rgba(229, 62, 62, 0.2); border: 1px solid #e53e3e; border-radius: 10px; padding: 1rem; color: #e53e3e;">
+                        ❌ Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Populate diseases grid
+        function populateDiseasesGrid() {
+            const grid = document.getElementById('diseasesGrid');
+            
+            Object.keys(diseasesData).forEach(diseaseKey => {
+                const disease = diseasesData[diseaseKey];
+                const severityClass = `severity-${disease.severity.toLowerCase()}`;
+                
+                const card = document.createElement('div');
+                card.className = 'disease-card';
+                card.innerHTML = `
+                    <h3>${disease.name}</h3>
+                    <div class="${severityClass}">Severity: ${disease.severity}</div>
+                    <img src="${disease.image}" alt="${disease.name}" class="disease-image" onerror="this.style.display='none'">
+                    <p><strong>Description:</strong> ${disease.description}</p>
+                    <p><strong>Cause:</strong> ${disease.cause}</p>
+                    <p><strong>Symptoms:</strong> ${disease.symptoms}</p>
+                    <p><strong>Treatment:</strong> ${disease.treatment}</p>
+                    <p><strong>Prevention:</strong> ${disease.prevention}</p>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            populateDiseasesGrid();
+        });
+    </script>
+</body>
+</html> 

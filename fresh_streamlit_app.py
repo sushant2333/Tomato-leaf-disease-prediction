@@ -7,7 +7,9 @@ import seaborn as sns
 from PIL import Image
 import io
 import base64
-from predict import TomatoDiseasePredictor
+import tensorflow as tf
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing.image import img_to_array
 import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
@@ -22,170 +24,275 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for better styling
+# Custom CSS for dark mode styling
 st.markdown("""
 <style>
+    /* Dark mode background and text colors */
+    .stApp {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        color: #ffffff;
+    }
+    
+    /* Main header with dark theme */
     .main-header {
         font-size: 3rem;
         font-weight: bold;
         text-align: center;
-        color: #e74c3c;
+        color: #00d4aa;
         margin-bottom: 2rem;
+        text-shadow: 0 0 20px rgba(0, 212, 170, 0.5);
     }
+    
+    /* Sub headers */
     .sub-header {
         font-size: 1.5rem;
-        color: #2c3e50;
+        color: #64ffda;
         margin-bottom: 1rem;
+        text-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
     }
+    
+    /* Prediction box with dark theme */
     .prediction-box {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+        color: #ffffff;
         padding: 2rem;
         border-radius: 15px;
-        border: 3px solid #e74c3c;
+        border: 2px solid #00d4aa;
         margin: 1.5rem 0;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        box-shadow: 0 8px 32px rgba(0, 212, 170, 0.2);
         text-align: center;
+        backdrop-filter: blur(10px);
     }
+    
     .prediction-box h3 {
-        color: white;
+        color: #00d4aa;
         font-size: 1.8rem;
         margin-bottom: 1rem;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        text-shadow: 0 0 10px rgba(0, 212, 170, 0.5);
     }
+    
     .prediction-box p {
         font-size: 1.2rem;
         margin: 0.5rem 0;
         font-weight: 500;
+        color: #e2e8f0;
     }
+    
+    /* Disease info box with dark theme */
     .disease-info {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        color: white;
+        background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+        color: #ffffff;
         padding: 2rem;
         border-radius: 15px;
-        border: 3px solid #e74c3c;
+        border: 2px solid #64ffda;
         margin: 1.5rem 0;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        box-shadow: 0 8px 32px rgba(100, 255, 218, 0.2);
+        backdrop-filter: blur(10px);
     }
+    
     .disease-info h4 {
-        color: white;
+        color: #64ffda;
         font-size: 1.6rem;
         margin-bottom: 1rem;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        text-shadow: 0 0 10px rgba(100, 255, 218, 0.5);
     }
+    
     .disease-info p {
         font-size: 1.1rem;
         margin: 0.8rem 0;
         line-height: 1.6;
+        color: #e2e8f0;
     }
+    
     .disease-info strong {
-        color: #f1c40f;
+        color: #00d4aa;
         font-weight: bold;
     }
-    .confidence-bar {
-        background-color: #ecf0f1;
-        border-radius: 10px;
-        overflow: hidden;
-        height: 25px;
-        margin: 0.5rem 0;
-        border: 2px solid #bdc3c7;
-    }
-    .confidence-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #27ae60, #2ecc71);
-        transition: width 0.5s ease;
-    }
-    .upload-section {
-        border: 3px dashed #e74c3c;
-        border-radius: 15px;
-        padding: 2rem;
-        text-align: center;
-        margin: 1rem 0;
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    }
-    .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 1.5rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        margin: 0.8rem 0;
-        border: 2px solid #e74c3c;
-    }
+    
+    /* Severity indicators with dark theme */
     .severity-critical {
-        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
         color: white;
         padding: 0.5rem 1rem;
         border-radius: 20px;
         font-weight: bold;
         display: inline-block;
         margin: 0.5rem 0;
+        box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
     }
+    
     .severity-high {
-        background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
         color: white;
         padding: 0.5rem 1rem;
         border-radius: 20px;
         font-weight: bold;
         display: inline-block;
         margin: 0.5rem 0;
+        box-shadow: 0 4px 15px rgba(237, 137, 54, 0.3);
     }
+    
     .severity-medium {
-        background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
+        background: linear-gradient(135deg, #ecc94b 0%, #d69e2e 100%);
         color: white;
         padding: 0.5rem 1rem;
         border-radius: 20px;
         font-weight: bold;
         display: inline-block;
         margin: 0.5rem 0;
+        box-shadow: 0 4px 15px rgba(236, 201, 75, 0.3);
     }
+    
     .severity-none {
-        background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
         color: white;
         padding: 0.5rem 1rem;
         border-radius: 20px;
         font-weight: bold;
         display: inline-block;
         margin: 0.5rem 0;
+        box-shadow: 0 4px 15px rgba(56, 161, 105, 0.3);
     }
+    
+    /* Button styling with dark theme */
     .stButton > button {
-        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-        color: white;
+        background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+        color: #1a1a2e;
         border: none;
         padding: 12px 24px;
         border-radius: 25px;
         font-size: 16px;
         font-weight: bold;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3);
         transition: all 0.3s ease;
     }
+    
     .stButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        box-shadow: 0 6px 20px rgba(0, 212, 170, 0.4);
+        background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
     }
-    .stFileUploader > div > div > div {
-        border: 3px dashed #e74c3c;
-        border-radius: 15px;
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    
+    /* Sidebar styling */
+    .css-1d391kg {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     }
-    .stCameraInput > div {
-        border: 3px solid #e74c3c;
-        border-radius: 15px;
-        overflow: hidden;
+    
+    /* Additional sidebar styling for dark theme */
+    .css-1d391kg .css-1d391kg {
+        background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+    }
+    
+    /* Sidebar background */
+    .css-1d391kg .css-1d391kg .css-1d391kg {
+        background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+    }
+    
+    /* Sidebar text color */
+    .css-1d391kg, .css-1d391kg * {
+        color: #ffffff !important;
+    }
+    
+    /* Sidebar headers */
+    .css-1d391kg h1, .css-1d391kg h2, .css-1d391kg h3 {
+        color: #64ffda !important;
+    }
+    
+    /* Sidebar info boxes */
+    .css-1d391kg .stAlert {
+        background: rgba(45, 55, 72, 0.9) !important;
+        border: 1px solid #64ffda !important;
+        color: #ffffff !important;
+    }
+    
+    /* Force sidebar dark background */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%) !important;
+        color: #ffffff !important;
+    }
+    
+    /* Sidebar content */
+    [data-testid="stSidebar"] * {
+        color: #ffffff !important;
+    }
+    
+    /* Sidebar headers */
+    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
+        color: #64ffda !important;
+    }
+    
+    /* Sidebar text */
+    [data-testid="stSidebar"] p, [data-testid="stSidebar"] div {
+        color: #e2e8f0 !important;
+    }
+    
+    /* File uploader styling */
+    .stUploadedFile {
+        background: rgba(45, 55, 72, 0.8);
+        border: 2px solid #00d4aa;
+        border-radius: 10px;
+        padding: 1rem;
+    }
+    
+    /* Info boxes */
+    .stAlert {
+        background: rgba(45, 55, 72, 0.9);
+        border: 1px solid #64ffda;
+        border-radius: 10px;
+    }
+    
+    /* Success messages */
+    .stSuccess {
+        background: rgba(56, 161, 105, 0.2);
+        border: 1px solid #38a169;
+        border-radius: 10px;
+    }
+    
+    /* Error messages */
+    .stError {
+        background: rgba(229, 62, 62, 0.2);
+        border: 1px solid #e53e3e;
+        border-radius: 10px;
+    }
+    
+    /* Warning messages */
+    .stWarning {
+        background: rgba(237, 137, 54, 0.2);
+        border: 1px solid #ed8936;
+        border-radius: 10px;
+    }
+    
+    /* Info messages */
+    .stInfo {
+        background: rgba(100, 255, 218, 0.2);
+        border: 1px solid #64ffda;
+        border-radius: 10px;
+    }
+    
+    /* Plotly charts dark theme */
+    .js-plotly-plot {
+        background: rgba(45, 55, 72, 0.8) !important;
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: #2d3748;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: #00d4aa;
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: #00b894;
     }
 </style>
 """, unsafe_allow_html=True)
-
-# Initialize predictor
-@st.cache_resource
-def load_predictor():
-    """Load the prediction model (cached for performance)"""
-    try:
-        predictor = TomatoDiseasePredictor()
-        return predictor
-    except Exception as e:
-        st.error(f"Error loading model: {str(e)}")
-        return None
 
 # Disease information dictionary
 DISEASE_INFO = {
@@ -290,34 +397,130 @@ DISEASE_INFO = {
     }
 }
 
+class TomatoDiseasePredictor:
+    def __init__(self, model_path='tomato_disease_model.h5', img_size=(224, 224)):
+        self.img_size = img_size
+        self.model = None
+        self.class_names = [
+            'Bacterial_spot',
+            'Early_blight', 
+            'Late_blight',
+            'Leaf_Mold',
+            'Septoria_leaf_spot',
+            'Spider_mites Two-spotted_spider_mite',
+            'Target_Spot',
+            'Tomato_Yellow_Leaf_Curl_Virus',
+            'Tomato_mosaic_virus',
+            'healthy',
+            'powdery_mildew'
+        ]
+        
+        # Load model if it exists
+        if os.path.exists(model_path):
+            try:
+                self.model = load_model(model_path)
+                st.success(f"✅ Model loaded from {model_path}")
+            except Exception as e:
+                st.error(f"❌ Error loading model: {e}")
+                self.model = None
+        else:
+            st.error(f"❌ Model file {model_path} not found. Please train the model first.")
+    
+    def preprocess_image(self, image):
+        """Preprocess a single image for prediction"""
+        try:
+            # Convert to RGB if it's not already
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+            
+            # Resize image
+            image = image.resize(self.img_size)
+            
+            # Convert to array and normalize
+            img_array = img_to_array(image)
+            img_array = img_array / 255.0
+            
+            # Add batch dimension
+            img_array = np.expand_dims(img_array, axis=0)
+            
+            return img_array
+            
+        except Exception as e:
+            st.error(f"❌ Error preprocessing image: {e}")
+            return None
+    
+    def predict(self, image):
+        """Predict disease for a single image"""
+        if self.model is None:
+            st.error("❌ No model loaded. Please train the model first.")
+            return None, None, None
+        
+        # Preprocess image
+        img_array = self.preprocess_image(image)
+        
+        if img_array is None:
+            return None, None, None
+        
+        try:
+            # Make prediction
+            predictions = self.model.predict(img_array)
+            predicted_class = np.argmax(predictions[0])
+            confidence = predictions[0][predicted_class]
+            
+            # Get predicted disease name
+            predicted_disease = self.class_names[predicted_class]
+            
+            return predicted_disease, confidence, predictions[0]
+            
+        except Exception as e:
+            st.error(f"❌ Error during prediction: {e}")
+            return None, None, None
+
+@st.cache_resource
+def load_predictor():
+    """Load the prediction model (cached for performance)"""
+    try:
+        predictor = TomatoDiseasePredictor()
+        return predictor
+    except Exception as e:
+        st.error(f"Error loading model: {str(e)}")
+        return None
+
 def create_confidence_gauge(confidence):
-    """Create a gauge chart for confidence level"""
+    """Create a gauge chart for confidence level with dark theme"""
     fig = go.Figure(go.Indicator(
         mode = "gauge+number+delta",
         value = confidence * 100,
         domain = {'x': [0, 1], 'y': [0, 1]},
-        title = {'text': "Confidence Level (%)", 'font': {'size': 20}},
+        title = {'text': "Confidence Level (%)", 'font': {'size': 20, 'color': '#ffffff'}},
         delta = {'reference': 80},
         gauge = {
-            'axis': {'range': [None, 100]},
-            'bar': {'color': "darkblue"},
+            'axis': {'range': [None, 100], 'tickcolor': '#ffffff', 'tickfont': {'color': '#ffffff'}},
+            'bar': {'color': "#00d4aa"},
             'steps': [
-                {'range': [0, 50], 'color': "lightgray"},
-                {'range': [50, 80], 'color': "yellow"},
-                {'range': [80, 100], 'color': "green"}
+                {'range': [0, 50], 'color': "#e53e3e"},
+                {'range': [50, 80], 'color': "#ed8936"},
+                {'range': [80, 100], 'color': "#38a169"}
             ],
             'threshold': {
-                'line': {'color': "red", 'width': 4},
+                'line': {'color': "#00d4aa", 'width': 4},
                 'thickness': 0.75,
                 'value': 90
             }
         }
     ))
-    fig.update_layout(height=300)
+    
+    # Dark theme layout
+    fig.update_layout(
+        height=300,
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font={'color': '#ffffff'}
+    )
     return fig
 
 def create_prediction_chart(predictions, class_names):
-    """Create a bar chart of all predictions"""
+    """Create a bar chart of all predictions with dark theme"""
     # Sort predictions by confidence
     sorted_indices = np.argsort(predictions)[::-1]
     sorted_predictions = predictions[sorted_indices]
@@ -326,22 +529,44 @@ def create_prediction_chart(predictions, class_names):
     # Get disease names for display
     disease_names = [DISEASE_INFO.get(cls, {}).get('name', cls) for cls in sorted_classes]
     
+    # Dark theme colors for diseases
+    dark_colors = {
+        'Bacterial_spot': '#e53e3e',
+        'Early_blight': '#ed8936', 
+        'Late_blight': '#8b5cf6',
+        'Leaf_Mold': '#10b981',
+        'Septoria_leaf_spot': '#f59e0b',
+        'Spider_mites Two-spotted_spider_mite': '#dc2626',
+        'Target_Spot': '#7c2d12',
+        'Tomato_Yellow_Leaf_Curl_Virus': '#fbbf24',
+        'Tomato_mosaic_virus': '#ea580c',
+        'healthy': '#059669',
+        'powdery_mildew': '#6b7280'
+    }
+    
     fig = go.Figure(data=[
         go.Bar(
             x=disease_names,
             y=sorted_predictions * 100,
-            marker_color=[DISEASE_INFO.get(cls, {}).get('color', '#3498db') for cls in sorted_classes],
+            marker_color=[dark_colors.get(cls, '#00d4aa') for cls in sorted_classes],
             text=[f'{pred*100:.1f}%' for pred in sorted_predictions],
             textposition='auto',
+            textfont={'color': '#ffffff'},
         )
     ])
     
+    # Dark theme layout
     fig.update_layout(
         title="All Disease Predictions",
         xaxis_title="Disease Type",
         yaxis_title="Confidence (%)",
         height=400,
-        showlegend=False
+        showlegend=False,
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font={'color': '#ffffff'},
+        xaxis={'tickfont': {'color': '#ffffff'}, 'gridcolor': '#4a5568'},
+        yaxis={'tickfont': {'color': '#ffffff'}, 'gridcolor': '#4a5568'}
     )
     
     return fig
@@ -405,9 +630,13 @@ def get_random_healthy_sample():
     return selected_image, len(image_files)
 
 def main():
-    # Header
-    st.markdown('<h1 class="main-header">🍅 Tomato Disease Predictor</h1>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align: center; font-size: 1.2rem; color: #7f8c8d;">Upload a tomato leaf image to identify potential diseases and get treatment recommendations</p>', unsafe_allow_html=True)
+    # Header with dark background
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%); padding: 2rem; border-radius: 15px; margin-bottom: 2rem; border: 2px solid #00d4aa;">
+        <h1 class="main-header">🍅 Tomato Disease Predictor</h1>
+        <p style="text-align: center; font-size: 1.2rem; color: #64ffda; margin: 0;">Upload a tomato leaf image to identify potential diseases and get treatment recommendations</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Load predictor
     predictor = load_predictor()
@@ -460,13 +689,6 @@ def main():
             help="Upload a clear image of a tomato leaf"
         )
         
-        # Clear session state when user uploads their own file
-        if uploaded_file is not None and (not hasattr(st.session_state, 'sample_path') or st.session_state.sample_path != uploaded_file.name):
-            if hasattr(st.session_state, 'selected_sample'):
-                del st.session_state.selected_sample
-            if hasattr(st.session_state, 'sample_path'):
-                del st.session_state.sample_path
-        
         # Camera capture
         camera_photo = st.camera_input("Or take a photo")
         
@@ -480,8 +702,6 @@ def main():
                 if result:
                     sample_path, total_samples = result
                     uploaded_file = open(sample_path, 'rb')
-                    st.session_state.selected_sample = "Healthy"
-                    st.session_state.sample_path = sample_path
                     st.success(f"✅ Selected random healthy sample: {os.path.basename(sample_path)} (from {total_samples} samples)")
         
         with sample_col2:
@@ -490,8 +710,6 @@ def main():
                 if result:
                     sample_path, disease_name, total_samples = result
                     uploaded_file = open(sample_path, 'rb')
-                    st.session_state.selected_sample = disease_name
-                    st.session_state.sample_path = sample_path
                     st.success(f"✅ Selected random disease sample: {disease_name} - {os.path.basename(sample_path)} (from {total_samples} samples)")
     
     with col2:
@@ -503,13 +721,6 @@ def main():
             if uploaded_file is not None:
                 image = Image.open(uploaded_file)
                 image_source = "uploaded file"
-                
-                # Show sample information if it's a sample
-                if hasattr(st.session_state, 'selected_sample') and hasattr(st.session_state, 'sample_path'):
-                    if st.session_state.selected_sample == "Healthy":
-                        st.info(f"🍃 Sample: Healthy tomato leaf - {os.path.basename(st.session_state.sample_path)}")
-                    else:
-                        st.info(f"🦠 Sample: {st.session_state.selected_sample} - {os.path.basename(st.session_state.sample_path)}")
             else:
                 image = Image.open(camera_photo)
                 image_source = "camera capture"
@@ -517,14 +728,10 @@ def main():
             # Display original image
             st.image(image, caption=f"Original Image ({image_source})", use_container_width=True)
             
-            # Save image temporarily for prediction
-            temp_path = "temp_streamlit_image.jpg"
-            image.save(temp_path)
-            
             # Make prediction
             with st.spinner("🔍 Analyzing image..."):
                 try:
-                    predicted_disease, confidence, predictions, original_img = predictor.predict(temp_path)
+                    predicted_disease, confidence, predictions = predictor.predict(image)
                     
                     if predicted_disease and predicted_disease in DISEASE_INFO:
                         disease_info = DISEASE_INFO[predicted_disease]
@@ -563,19 +770,15 @@ def main():
                         
                 except Exception as e:
                     st.error(f"❌ Error during prediction: {str(e)}")
-                finally:
-                    # Clean up temporary file
-                    if os.path.exists(temp_path):
-                        os.remove(temp_path)
         else:
             st.info("👆 Please upload an image or take a photo to get started!")
     
-    # Footer
+    # Footer with dark background
     st.markdown("---")
     st.markdown("""
-    <div style="text-align: center; color: #7f8c8d; padding: 1rem;">
-        <p>🍅 Built with Streamlit & TensorFlow | Tomato Disease Classification Model</p>
-        <p>For best results, use clear, well-lit images of tomato leaves</p>
+    <div style="background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%); text-align: center; color: #64ffda; padding: 2rem; border-radius: 15px; margin-top: 2rem; border: 2px solid #00d4aa;">
+        <p style="margin: 0 0 0.5rem 0; font-size: 1.1rem;">🍅 Built with Streamlit & TensorFlow | Tomato Disease Classification Model</p>
+        <p style="margin: 0; font-size: 1rem; color: #a0aec0;">For best results, use clear, well-lit images of tomato leaves</p>
     </div>
     """, unsafe_allow_html=True)
 

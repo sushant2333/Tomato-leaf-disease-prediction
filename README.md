@@ -1,201 +1,226 @@
-# 🍅 Tomato Disease Prediction App
+# 🍅 Tomato Disease Prediction Web App
 
-A machine learning application that uses deep learning to predict tomato plant diseases from leaf images. Built with Streamlit and TensorFlow.
+A beautiful, AI-powered web application for detecting and diagnosing tomato plant diseases using deep learning. Built with Flask, TensorFlow, and modern web technologies.
 
-## 🌟 Features
+![Tomato Disease Predictor](https://img.shields.io/badge/Python-3.8+-blue.svg)
+![Flask](https://img.shields.io/badge/Flask-2.3.3-green.svg)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-2.13.0-orange.svg)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-- **11 Disease Categories**: Detects 10 different diseases plus healthy plants
-- **Real-time Prediction**: Upload images or take photos for instant analysis
-- **Detailed Information**: Get disease descriptions, causes, symptoms, and treatment recommendations
-- **Random Sample Testing**: Try different disease samples with random selection
-- **Beautiful UI**: Modern, responsive interface with interactive visualizations
-- **Confidence Metrics**: View prediction confidence with gauge charts
+## ✨ Features
+
+- **🔍 AI-Powered Detection**: Advanced deep learning model for accurate disease identification
+- **🌙 Dark Neon Theme**: Beautiful dark mode interface with neon accents
+- **📱 Responsive Design**: Works perfectly on desktop, tablet, and mobile devices
+- **📚 Comprehensive Disease Guide**: Detailed information about all 11 tomato diseases
+- **🎯 Real-time Analysis**: Instant prediction results with confidence scores
+- **📊 Visual Results**: Interactive charts and confidence bars
+- **🖼️ Sample Images**: Real sample images from the dataset for each disease type
 
 ## 🚀 Quick Start
 
-### Local Development
+### Prerequisites
+
+- Python 3.8 or higher
+- pip package manager
+
+### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repo-url>
-   cd tomato_disease_prediction
+   git clone https://github.com/yourusername/tomato-disease-prediction.git
+   cd tomato-disease-prediction
    ```
 
-2. **Install dependencies**
+2. **Create virtual environment**
    ```bash
-   pip install -r requirements.txt
+   python -m venv tomato_disease_env
    ```
 
-3. **Run the app**
+3. **Activate virtual environment**
    ```bash
-   streamlit run streamlit_app.py
-   ```
-
-4. **Open your browser**
-   Navigate to `http://localhost:8501`
-
-## 📦 Deployment Options
-
-### 1. Streamlit Cloud (Recommended)
-
-**Free and Easy Deployment**
-
-1. **Push to GitHub**
-   ```bash
-   git add .
-   git commit -m "Initial commit"
-   git push origin main
-   ```
-
-2. **Deploy on Streamlit Cloud**
-   - Go to [share.streamlit.io](https://share.streamlit.io)
-   - Sign in with GitHub
-   - Click "New app"
-   - Select your repository
-   - Set the path to your app: `streamlit_app.py`
-   - Click "Deploy"
-
-### 2. Heroku
-
-**For more control and custom domains**
-
-1. **Create Heroku app**
-   ```bash
-   heroku create your-app-name
-   ```
-
-2. **Add buildpacks**
-   ```bash
-   heroku buildpacks:add heroku/python
-   ```
-
-3. **Deploy**
-   ```bash
-   git push heroku main
-   ```
-
-### 3. Railway
-
-**Simple deployment with automatic scaling**
-
-1. **Connect to Railway**
-   - Go to [railway.app](https://railway.app)
-   - Connect your GitHub repository
-   - Railway will automatically detect and deploy your Streamlit app
-
-### 4. Docker Deployment
-
-**For containerized deployment**
-
-1. **Create Dockerfile**
-   ```dockerfile
-   FROM python:3.9-slim
+   # Windows
+   tomato_disease_env\Scripts\activate
    
-   WORKDIR /app
-   COPY requirements.txt .
-   RUN pip install -r requirements.txt
-   
-   COPY . .
-   EXPOSE 8501
-   
-   CMD ["streamlit", "run", "streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+   # macOS/Linux
+   source tomato_disease_env/bin/activate
    ```
 
-2. **Build and run**
+4. **Install dependencies**
    ```bash
-   docker build -t tomato-disease-app .
-   docker run -p 8501:8501 tomato-disease-app
+   pip install -r web_requirements.txt
    ```
+
+5. **Download the model**
+   - Download the trained model file `best_tomato_model.h5`
+   - Place it in the root directory of the project
+
+6. **Run the application**
+   ```bash
+   python run_web_app.py
+   ```
+
+7. **Open your browser**
+   - Navigate to `http://localhost:5000`
+   - The app will open automatically
 
 ## 📁 Project Structure
 
 ```
-tomato_disease_prediction/
-├── streamlit_app.py          # Main Streamlit application
-├── predict.py               # Prediction model class
-├── requirements.txt         # Python dependencies
-├── .streamlit/
-│   └── config.toml        # Streamlit configuration
-├── train/                  # Training dataset
-│   ├── healthy/
-│   ├── Bacterial_spot/
-│   ├── Early_blight/
-│   └── ... (other disease folders)
-├── valid/                  # Validation dataset
-├── advanced_tomato_model.keras  # Trained model
-└── README.md
+tomato-disease-prediction/
+├── app.py                      # Flask backend application
+├── run_web_app.py             # Application launcher
+├── templates/
+│   └── web_app.html          # Main web interface
+├── static/
+│   └── images/               # Sample disease images
+├── web_requirements.txt       # Python dependencies
+├── WEB_APP_README.md         # Detailed documentation
+├── .gitignore                # Git ignore rules
+└── README.md                 # This file
 ```
 
-## 🧠 Model Information
+## 🎯 How to Use
 
-- **Architecture**: ResNet50V2 with Transfer Learning
-- **Input Size**: 224x224 pixels
-- **Classes**: 11 (10 diseases + healthy)
-- **Framework**: TensorFlow/Keras
-- **Accuracy**: High accuracy on tomato disease classification
+### 1. Disease Prediction
+1. Click on the **"🔍 Prediction"** tab
+2. Upload a clear image of a tomato leaf
+3. Click **"🔍 Analyze Image"**
+4. View the prediction results with confidence scores
+5. Read detailed information about the detected disease
+
+### 2. Disease Guide
+1. Click on the **"📚 Disease Guide"** tab
+2. Browse through all 11 tomato diseases
+3. View sample images, symptoms, and treatment information
+4. Learn about prevention methods for each disease
 
 ## 🦠 Supported Diseases
 
-1. **Healthy** - No disease detected
-2. **Bacterial Spot** - Bacterial infection
-3. **Early Blight** - Fungal disease
-4. **Late Blight** - Serious fungal disease
-5. **Leaf Mold** - Fungal disease
-6. **Septoria Leaf Spot** - Fungal disease
-7. **Spider Mites** - Pest infestation
-8. **Target Spot** - Fungal disease
-9. **Yellow Leaf Curl Virus** - Viral disease
-10. **Mosaic Virus** - Viral disease
-11. **Powdery Mildew** - Fungal disease
+The application can detect and provide information about:
 
-## 🔧 Configuration
+1. **Bacterial Spot** - High severity bacterial disease
+2. **Early Blight** - Medium severity fungal disease
+3. **Late Blight** - Critical severity fungal disease
+4. **Leaf Mold** - Medium severity fungal disease
+5. **Septoria Leaf Spot** - Medium severity fungal disease
+6. **Spider Mites** - Medium severity pest infestation
+7. **Target Spot** - Medium severity fungal disease
+8. **Yellow Leaf Curl Virus** - High severity viral disease
+9. **Mosaic Virus** - High severity viral disease
+10. **Powdery Mildew** - Medium severity fungal disease
+11. **Healthy Plants** - No disease detected
 
-### Environment Variables
+## 🛠️ Technical Details
 
-Create a `.env` file for local development:
+### Backend
+- **Framework**: Flask 2.3.3
+- **AI Model**: TensorFlow 2.13.0 with custom CNN
+- **Image Processing**: Pillow 10.0.0
+- **Data Processing**: NumPy 1.24.3
 
-```env
-STREAMLIT_SERVER_PORT=8501
-STREAMLIT_SERVER_ADDRESS=localhost
-```
+### Frontend
+- **HTML5**: Semantic markup
+- **CSS3**: Modern styling with gradients and animations
+- **JavaScript**: Vanilla JS for interactivity
+- **Responsive Design**: Mobile-first approach
 
-### Model Path
+### AI Model
+- **Architecture**: Convolutional Neural Network (CNN)
+- **Input Size**: 224x224 pixels
+- **Classes**: 11 disease categories
+- **Accuracy**: High accuracy on test dataset
 
-Ensure your trained model file (`advanced_tomato_model.keras`) is in the project root directory.
+## 🎨 Design Features
+
+- **Dark Theme**: Easy on the eyes with neon accents
+- **Neon Effects**: Glowing borders and text effects
+- **Smooth Animations**: CSS transitions and keyframes
+- **Responsive Layout**: Adapts to all screen sizes
+- **Interactive Elements**: Hover effects and visual feedback
 
 ## 📊 Performance
 
-- **Prediction Time**: < 2 seconds per image
-- **Memory Usage**: ~500MB RAM
-- **CPU Usage**: Moderate during prediction
+- **Fast Loading**: Optimized images and assets
+- **Real-time Analysis**: Quick prediction results
+- **Efficient Model**: Lightweight CNN architecture
+- **Caching**: Static file serving for better performance
+
+## 🔧 Customization
+
+### Adding New Diseases
+1. Update the `DISEASE_INFO` dictionary in `app.py`
+2. Add sample images to `static/images/`
+3. Retrain the model with new data
+4. Update the class names in the predictor
+
+### Styling Changes
+- Modify CSS in `templates/web_app.html`
+- Update color schemes and animations
+- Customize layout and responsive breakpoints
+
+## 🚀 Deployment
+
+### Local Development
+```bash
+python run_web_app.py
+```
+
+### Production Deployment
+1. Use a production WSGI server (Gunicorn, uWSGI)
+2. Set up reverse proxy (Nginx, Apache)
+3. Configure environment variables
+4. Set up SSL certificates
+
+### Docker Deployment
+```dockerfile
+FROM python:3.9-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+EXPOSE 5000
+CMD ["python", "run_web_app.py"]
+```
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 📄 License
+## 📝 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
-- Dataset: PlantVillage dataset
-- Model: ResNet50V2 architecture
-- UI: Streamlit framework
-- Icons: Emoji icons for better UX
+- Dataset providers for the tomato disease images
+- TensorFlow and Keras communities
+- Flask development team
+- Open source contributors
 
 ## 📞 Support
 
-If you encounter any issues:
+If you encounter any issues or have questions:
 
-1. Check the [Issues](https://github.com/your-repo/issues) page
+1. Check the [Issues](https://github.com/yourusername/tomato-disease-prediction/issues) page
 2. Create a new issue with detailed information
-3. Include error messages and steps to reproduce
+3. Contact the maintainers
+
+## 🔮 Future Enhancements
+
+- [ ] Mobile app version
+- [ ] Additional plant species support
+- [ ] Real-time camera integration
+- [ ] Advanced analytics dashboard
+- [ ] Multi-language support
+- [ ] API endpoints for third-party integration
 
 ---
 
-**Happy Tomato Disease Detection! 🍅🔬** 
+**Made with ❤️ for the agricultural community**
+
+*Help farmers protect their crops with AI-powered disease detection!* 
